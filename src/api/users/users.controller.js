@@ -1,4 +1,7 @@
+require('dotenv').config();
 const { findRolesByUserId } = require('../users/users.service');
+const jwt = require('jsonwebtoken');
+const secretKey = process.env.JWT_SECRET;
 
 const getUserRoles = async (req, res) => {
     try {
@@ -12,6 +15,20 @@ const getUserRoles = async (req, res) => {
     }
 };
 
+const selectRole = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const roleId = req.body.token;
+
+        const token = jwt.sign({ id: userId, role: roleId}, secretKey, { expiresIn: '1h' });
+        return res.status(200).json({ message: 'Role selected successfully.', data: { token } });
+    } catch (error) {
+        console.error('Error selecting user role:', error);
+        return res.status(500).json({ message: 'Error selecting user role: ' + error.message });
+    }
+};
+
 module.exports = {
-    getUserRoles
+    getUserRoles,
+    selectRole
 };

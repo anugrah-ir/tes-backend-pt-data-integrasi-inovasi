@@ -4,16 +4,6 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const secretKey = process.env.JWT_SECRET;
 
-const checkPassword = async (inputPassword, storedPassword) => {
-    const match = await bcrypt.compare(inputPassword, storedPassword); 
-    return match;
-};
-
-const generateToken = (payload) => {
-    const options = { expiresIn: '1h' };
-    return jwt.sign(payload, secretKey, options);
-};
-
 const register = async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -28,7 +18,7 @@ const register = async (req, res) => {
         };
 
         const user = await createUser({ username, password });
-        const token = generateToken({ id: user.id });
+        const token = jwt.sign({ id: user.id }, secretKey, { expiresIn: '1h' });
         return res.status(201).json({ message: 'User registered successfully.', data: { token } });
     } catch (error) {
         console.error('Registration error:', error);
@@ -48,12 +38,12 @@ const login = async (req, res) => {
         if (!user) {
             return res.status(401).json({ message: 'Invalid username or password.' });
         }
-        const isPasswordValid = await checkPassword(password, user.password);
+        const isPasswordValid = await bcrypt.compare(inputPassword, storedPassword);
         if (!isPasswordValid) {
             return res.status(401).json({ message: 'Invalid username or password.' });
         };
 
-        const token = generateToken({ id: user.id });
+        const token = jwt.sign({ id: user.id }, secretKey, { expiresIn: '1h' });
         return res.status(200).json({ message: 'Login successful.', data: { token } });
     } catch (error) {
         console.error('Login error:', error);
