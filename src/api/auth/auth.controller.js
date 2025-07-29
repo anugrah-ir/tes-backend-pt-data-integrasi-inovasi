@@ -33,12 +33,11 @@ const login = async (req, res) => {
         if (!username || !password) {
             return res.status(400).json({ message: 'Username and password are required.' });
         }
-
         const user = await findUserByUsername(username);
         if (!user) {
             return res.status(401).json({ message: 'Invalid username or password.' });
         }
-        const isPasswordValid = await bcrypt.compare(inputPassword, storedPassword);
+        const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
             return res.status(401).json({ message: 'Invalid username or password.' });
         };

@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { findRolesByUserId } = require('../users/users.service');
+const { findAllRolesByUserId, findAllMenuByRoleId} = require('../users/users.service');
 const jwt = require('jsonwebtoken');
 const secretKey = process.env.JWT_SECRET;
 
@@ -7,7 +7,7 @@ const getUserRoles = async (req, res) => {
     try {
         const userId = req.user.id;
 
-        const roles = await findRolesByUserId(userId);
+        const roles = await findAllRolesByUserId(userId);
         return res.status(200).json({ message: 'User roles fetched successfully.', data: roles });
     } catch (error) {
         console.error('Error fetching user roles:', error);
@@ -18,7 +18,7 @@ const getUserRoles = async (req, res) => {
 const selectRole = async (req, res) => {
     try {
         const userId = req.user.id;
-        const roleId = req.body.token;
+        const roleId = req.body.roleId;
 
         const token = jwt.sign({ id: userId, role: roleId}, secretKey, { expiresIn: '1h' });
         return res.status(200).json({ message: 'Role selected successfully.', data: { token } });
@@ -28,7 +28,23 @@ const selectRole = async (req, res) => {
     }
 };
 
+const getUserMenus = async (req, res) => {
+    try {
+        const roleId = req.user.role;
+        if (!roleId) {
+            return res.status(400).json({ message: 'Token is invalid.' });
+        };
+
+        const menus = await findAllMenuByRoleId(roleId);
+        return res.status(200).json({ message: 'Role menus fetched successfully.', data: menus });
+    } catch (error) {
+        console.error('Error fetching role menus:', error);
+        return res.status(500).json({ message: 'Error fetching role menus: ' + error.message });
+    }
+};
+
 module.exports = {
     getUserRoles,
-    selectRole
+    selectRole,
+    getUserMenus
 };

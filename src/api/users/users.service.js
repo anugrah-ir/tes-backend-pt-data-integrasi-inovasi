@@ -1,6 +1,38 @@
 const db = require('../../config/database');
 const bcrypt = require('bcrypt');
 
+const convertToNestedArray = async (items) => {
+    const itemMap = new Map();
+    const nestedArray = [];
+
+    items.forEach(item => {
+        itemMap.set(item.id, { ...item, children: [] });
+    });
+
+    itemMap.forEach(item => {
+        if (item.parent_id === null) {
+            nestedArray.push(item);
+        } else {
+            const parent = itemMap.get(item.parent_id);
+            if (parent) {
+                parent.children.push(item);
+            }
+        }
+    });
+
+    const sortByOrder = (arr) => {
+        arr.sort((a, b) => a.order_number - b.order_number);
+        arr.forEach(item => {
+            if (item.children.length > 0) {
+                sortByOrder(item.children);
+            }
+        });
+    };
+
+    sortByOrder(nestedArray);
+    return nestedArray;
+};
+
 const createUser = async (user) => {
     const { username, password } = user;
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -64,7 +96,7 @@ const deleteUser = async (id) => {
     }
 };
 
-const findRolesByUserId = async (userId) => {
+const findAllRolesByUserId = async (userId) => {
     const query = `
         SELECT r.* FROM roles r
         JOIN user_roles ur ON r.id = ur.role_id
@@ -80,11 +112,29 @@ const findRolesByUserId = async (userId) => {
     }
 };
 
+const findAllMenuByRoleId = async (roleId) => {
+    const query = `
+        SELECT m.id, m.name, m.url, m.icon, m.parent_id, m.order_number FROM menus m
+        JOIN role_menus rm ON m.id = rm.menu_id
+        WHERE rm.role_id = $1
+    `;
+    const values = [roleId];
+
+    try {
+        const result = await db.query(query, values);
+        const nestedArray = await convertToNestedArray(result.rows);
+        return nestedArray;
+    } catch (error) {
+        throw new Error('Error fetching menus by role ID: ' + error.message);
+    }
+};
+
 module.exports = {
     createUser,
     findUserByID,
     updateUser,
     deleteUser,
     findUserByUsername,
-    findRolesByUserId
+    findAllRolesByUserId,
+    findAllMenuByRoleId
 };
