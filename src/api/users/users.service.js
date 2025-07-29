@@ -27,6 +27,18 @@ const getuserByID = async (id) => {
     }
 };
 
+const getUserByUsername = async (username) => {
+    const query = 'SELECT * FROM users WHERE username = $1';
+    const values = [username];
+    
+    try {
+        const result = await db.query(query, values);
+        return result.rows[0];
+    } catch (error) {
+        throw new Error('Error fetching user by username: ' + error.message);
+    }
+};
+
 const updateUser = async (id, user) => {
     const { username, password } = user;
     const query = 'UPDATE users SET username = $1, password = $2 WHERE id = $3 RETURNING *';
@@ -56,5 +68,6 @@ module.exports = {
     createUser,
     getuserByID,
     updateUser,
-    deleteUser
+    deleteUser,
+    getUserByUsername
 };
