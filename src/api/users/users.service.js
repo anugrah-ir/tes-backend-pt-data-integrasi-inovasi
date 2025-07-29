@@ -1,37 +1,7 @@
 const db = require('../../config/database');
 const bcrypt = require('bcrypt');
-
-const convertToNestedArray = async (items) => {
-    const itemMap = new Map();
-    const nestedArray = [];
-
-    items.forEach(item => {
-        itemMap.set(item.id, { ...item, children: [] });
-    });
-
-    itemMap.forEach(item => {
-        if (item.parent_id === null) {
-            nestedArray.push(item);
-        } else {
-            const parent = itemMap.get(item.parent_id);
-            if (parent) {
-                parent.children.push(item);
-            }
-        }
-    });
-
-    const sortByOrder = (arr) => {
-        arr.sort((a, b) => a.order_number - b.order_number);
-        arr.forEach(item => {
-            if (item.children.length > 0) {
-                sortByOrder(item.children);
-            }
-        });
-    };
-
-    sortByOrder(nestedArray);
-    return nestedArray;
-};
+const convertToNestedArray = require('../../utils/nestedArray');
+const { get } = require('./users.route');
 
 const createUser = async (user) => {
     const { username, password } = user;
@@ -47,7 +17,7 @@ const createUser = async (user) => {
     }
 };
 
-const findUserByID = async (id) => {
+const getUserByID = async (id) => {
     const query = 'SELECT * FROM users WHERE id = $1';
     const values = [id];
     
@@ -59,15 +29,13 @@ const findUserByID = async (id) => {
     }
 };
 
-const findUserByUsername = async (username) => {
-    const query = 'SELECT * FROM users WHERE username = $1';
-    const values = [username];
-    
+const getAllusers = async () => {
+    const query = 'SELECT * FROM users';
     try {
-        const result = await db.query(query, values);
-        return result.rows[0];
+        const result = await db.query(query);
+        return result.rows;
     } catch (error) {
-        throw new Error('Error fetching user by username: ' + error.message);
+        throw new Error('Error fetching all users: ' + error.message);
     }
 };
 
@@ -93,6 +61,18 @@ const deleteUser = async (id) => {
         return result.rows[0];
     } catch (error) {
         throw new Error('Error deleting user: ' + error.message);
+    }
+};
+
+const findUserByUsername = async (username) => {
+    const query = 'SELECT * FROM users WHERE username = $1';
+    const values = [username];
+    
+    try {
+        const result = await db.query(query, values);
+        return result.rows[0];
+    } catch (error) {
+        throw new Error('Error fetching user by username: ' + error.message);
     }
 };
 
@@ -131,7 +111,8 @@ const findAllMenuByRoleId = async (roleId) => {
 
 module.exports = {
     createUser,
-    findUserByID,
+    getUserByID,
+    getAllusers,
     updateUser,
     deleteUser,
     findUserByUsername,

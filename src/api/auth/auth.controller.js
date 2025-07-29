@@ -50,7 +50,24 @@ const login = async (req, res) => {
     }
 };
 
+const selectRole = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const roleId = req.body.roleId;
+        if (!roleId) {
+            return res.status(400).json({ message: 'Please select a role first.' });
+        }
+
+        const token = jwt.sign({ id: userId, role: roleId}, secretKey, { expiresIn: '1h' });
+        return res.status(200).json({ message: 'Role selected successfully.', data: { token } });
+    } catch (error) {
+        console.error('Error selecting user role:', error);
+        return res.status(500).json({ message: 'Error selecting user role: ' + error.message });
+    }
+};
+
 module.exports = {
     register,
-    login
+    login,
+    selectRole
 };
