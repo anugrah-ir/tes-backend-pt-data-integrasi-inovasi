@@ -15,7 +15,7 @@ const createUser = async (user) => {
     }
 };
 
-const getuserByID = async (id) => {
+const findUserByID = async (id) => {
     const query = 'SELECT * FROM users WHERE id = $1';
     const values = [id];
     
@@ -27,7 +27,7 @@ const getuserByID = async (id) => {
     }
 };
 
-const getUserByUsername = async (username) => {
+const findUserByUsername = async (username) => {
     const query = 'SELECT * FROM users WHERE username = $1';
     const values = [username];
     
@@ -64,10 +64,27 @@ const deleteUser = async (id) => {
     }
 };
 
+const findRolesByUserId = async (userId) => {
+    const query = `
+        SELECT r.* FROM roles r
+        JOIN user_roles ur ON r.id = ur.role_id
+        WHERE ur.user_id = $1
+    `;
+    const values = [userId];
+
+    try {
+        const result = await db.query(query, values);
+        return result.rows;
+    } catch (error) {
+        throw new Error('Error fetching user roles: ' + error.message);
+    }
+};
+
 module.exports = {
     createUser,
-    getuserByID,
+    findUserByID,
     updateUser,
     deleteUser,
-    getUserByUsername
+    findUserByUsername,
+    findRolesByUserId
 };

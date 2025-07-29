@@ -1,10 +1,17 @@
-const { createUser, getUserByUsername } = require('../users/users.service');
-const { generateToken } = require('../../utils/jwt');
+require('dotenv').config();
+const { createUser, findUserByUsername } = require('../users/users.service');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const secretKey = process.env.JWT_SECRET;
 
 const checkPassword = async (inputPassword, storedPassword) => {
     const match = await bcrypt.compare(inputPassword, storedPassword); 
     return match;
+};
+
+const generateToken = (payload) => {
+    const options = { expiresIn: '1h' };
+    return jwt.sign(payload, secretKey, options);
 };
 
 const register = async (req, res) => {
@@ -15,7 +22,7 @@ const register = async (req, res) => {
         return res.status(400).json({ message: 'Username and password are required.' });
         }
 
-        const existingUser = await getUserByUsername(username);
+        const existingUser = await findUserByUsername(username);
         if (existingUser) {
             return res.status(409).json({ message: 'User already exists.' });
         };
@@ -37,7 +44,7 @@ const login = async (req, res) => {
             return res.status(400).json({ message: 'Username and password are required.' });
         }
 
-        const user = await getUserByUsername(username);
+        const user = await findUserByUsername(username);
         if (!user) {
             return res.status(401).json({ message: 'Invalid username or password.' });
         }

@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const authRoutes = require('./src/api/auth/auth.route');
+const userRoutes = require('./src/api/users/users.route');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -8,6 +9,7 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
+app.use('/api/user', userRoutes);
 
 app.get('/', (req, res) => {
     res.send('Server is online.');
