@@ -1,3 +1,27 @@
+const db = require('../../configs/database');
+const buildSortedTree = require('../../utils/buildSortedTree');
+
+// user's roles services
+
+const getRoleMenus = async (roleId) => {
+    const query = `
+        SELECT m.id, m.name, m.url, m.icon, m.parent_id, m.order_number FROM menus m
+        JOIN role_menus rm ON m.id = rm.menu_id
+        WHERE rm.role_id = $1
+    `;
+    const values = [roleId];
+
+    try {
+        const result = await db.query(query, values);
+        const sortedTree = await buildSortedTree(result.rows);
+        return sortedTree;
+    } catch (error) {
+        throw new Error('Error fetching menus by role ID: ' + error.message);
+    }
+};
+
+// admin's roles services
+
 const createRole = async (role) => {
     const { name } = role;
     const query = 'INSERT INTO roles (name) VALUES ($1) RETURNING *';
@@ -60,6 +84,9 @@ const deleteRole = async (id) => {
 };
 
 module.exports = {
+    // user's roles services
+    getRoleMenus,
+    // admin's roles services
     createRole,
     getRoleByID,
     getAllRoles,

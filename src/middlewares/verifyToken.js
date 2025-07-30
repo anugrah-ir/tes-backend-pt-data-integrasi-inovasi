@@ -1,11 +1,6 @@
 const jwt = require('jsonwebtoken');
 const secretKey = process.env.JWT_SECRET;
 
-const generateToken = (payload) => {
-    const options = { expiresIn: '1h' };
-    return jwt.sign(payload, secretKey, options);
-};
-
 const verifyToken = (req, res, next) => {
     try {
         const authHeader = req.headers['authorization'];
@@ -28,7 +23,4 @@ const verifyToken = (req, res, next) => {
     }
 };
 
-module.exports = {
-    generateToken,
-    verifyToken
-};
+module.exports = verifyToken;

@@ -1,3 +1,7 @@
+const db = require('../../configs/database');
+
+// admin's menus services
+
 const createMenu = async (menu) => {
     const { name, url, icon, parent_id, order_number } = menu;
     const query = 'INSERT INTO menus (name, url, icon, parent_id, order_number) VALUES ($1, $2, $3, $4, $5) RETURNING *';
@@ -33,6 +37,7 @@ const getAllMenus = async () => {
         throw new Error('Error fetching all menus: ' + error.message);
     }
 };
+
 const updateMenu = async (id, menu) => {
     const { name, url, icon, parent_id, order_number } = menu;
     const query = 'UPDATE menus SET name = $1, url = $2, icon = $3, parent_id = $4, order_number = $5 WHERE id = $6 RETURNING *';
@@ -59,6 +64,7 @@ const deleteMenu = async (id) => {
 };
 
 module.exports = {
+    // admin's menus services
     createMenu,
     getMenuByID,
     getAllMenus,

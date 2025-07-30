@@ -1,5 +1,7 @@
 const menusService = require('./menus.service');
 
+// admin's menus controllers
+
 const createMenu = async (req, res) => {
     try {
         const menu = req.body;
@@ -60,6 +62,7 @@ const deleteMenu = async (req, res) => {
 };
 
 module.exports = {
+    // admin's menus controllers
     createMenu,
     getMenuByID,
     getAllMenus,

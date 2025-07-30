@@ -1,7 +1,25 @@
-const db = require('../../config/database');
+const db = require('../../configs/database');
 const bcrypt = require('bcrypt');
-const convertToNestedArray = require('../../utils/nestedArray');
-const { get } = require('./users.route');
+
+// user's users services
+
+const findAllRolesByUserId = async (userId) => {
+    const query = `
+        SELECT r.* FROM roles r
+        JOIN user_roles ur ON r.id = ur.role_id
+        WHERE ur.user_id = $1
+    `;
+    const values = [userId];
+
+    try {
+        const result = await db.query(query, values);
+        return result.rows;
+    } catch (error) {
+        throw new Error('Error fetching user roles: ' + error.message);
+    }
+};
+
+// admin's users services
 
 const createUser = async (user) => {
     const { username, password } = user;
@@ -64,58 +82,13 @@ const deleteUser = async (id) => {
     }
 };
 
-const findUserByUsername = async (username) => {
-    const query = 'SELECT * FROM users WHERE username = $1';
-    const values = [username];
-    
-    try {
-        const result = await db.query(query, values);
-        return result.rows[0];
-    } catch (error) {
-        throw new Error('Error fetching user by username: ' + error.message);
-    }
-};
-
-const findAllRolesByUserId = async (userId) => {
-    const query = `
-        SELECT r.* FROM roles r
-        JOIN user_roles ur ON r.id = ur.role_id
-        WHERE ur.user_id = $1
-    `;
-    const values = [userId];
-
-    try {
-        const result = await db.query(query, values);
-        return result.rows;
-    } catch (error) {
-        throw new Error('Error fetching user roles: ' + error.message);
-    }
-};
-
-const findAllMenuByRoleId = async (roleId) => {
-    const query = `
-        SELECT m.id, m.name, m.url, m.icon, m.parent_id, m.order_number FROM menus m
-        JOIN role_menus rm ON m.id = rm.menu_id
-        WHERE rm.role_id = $1
-    `;
-    const values = [roleId];
-
-    try {
-        const result = await db.query(query, values);
-        const nestedArray = await convertToNestedArray(result.rows);
-        return nestedArray;
-    } catch (error) {
-        throw new Error('Error fetching menus by role ID: ' + error.message);
-    }
-};
-
 module.exports = {
+    // user's users services
+    findAllRolesByUserId,
+    // admin's users services
     createUser,
     getUserByID,
     getAllusers,
     updateUser,
     deleteUser,
-    findUserByUsername,
-    findAllRolesByUserId,
-    findAllMenuByRoleId
 };

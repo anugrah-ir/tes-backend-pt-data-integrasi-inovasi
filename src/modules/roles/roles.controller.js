@@ -1,5 +1,24 @@
 const rolesService = require('./roles.service');
 
+// user's roles controllers
+
+const getRoleMenus = async (req, res) => {
+    try {
+        const roleId = req.user.role;
+        if (!roleId) {
+            return res.status(400).json({ message: 'Please select a role first.' });
+        }
+
+        const menus = await rolesService.getRoleMenus(roleId);
+        return res.status(200).json({ message: 'Role menus fetched successfully.', data: menus });
+    } catch (error) {
+        console.error('Error fetching role menus:', error);
+        return res.status(500).json({ message: 'Error fetching role menus: ' + error.message });
+    }
+};
+
+// admin's roles controllers
+
 const createRole = async (req, res) => {
     const { name } = req.body;
 
@@ -72,6 +91,9 @@ const deleteRole = async (req, res) => {
 };
 
 module.exports = rolesController = {
+    // user's roles controllers
+    getRoleMenus,
+    // admin's roles controllers
     createRole,
     getRoleByID,
     getAllRoles,

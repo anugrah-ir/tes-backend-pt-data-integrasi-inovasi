@@ -1,9 +1,10 @@
 const routes = require('express').Router();
 const menusController = require('./menu.controller');
-const {verifyToken} = require('../../middleware/jwt');
-const isAdmin = require('../../middleware/isAdmin');
+const verifyToken = require('../../middlewares/verifyToken');
+const isAdmin = require('../../middlewares/isAdmin');
 
 routes
+    // admin's menus routes
     .post('/', verifyToken, isAdmin, menusController.createMenu)
     .get('/:id', verifyToken, isAdmin, menusController.getMenuByID)
     .get('/', verifyToken, isAdmin, menusController.getAllMenus)
