@@ -22,10 +22,9 @@ const getRoleMenus = async (roleId) => {
 
 // admin's roles services
 
-const createRole = async (role) => {
-    const { name } = role;
-    const query = 'INSERT INTO roles (name) VALUES ($1) RETURNING *';
-    const values = [name];
+const createRole = async (name, description) => {
+    const query = 'INSERT INTO roles (name, description) VALUES ($1, $2) RETURNING *';
+    const values = [name, description];
 
     try {
         const result = await db.query(query, values);
@@ -38,6 +37,18 @@ const createRole = async (role) => {
 const getRoleByID = async (id) => {
     const query = 'SELECT * FROM roles WHERE id = $1';
     const values = [id];
+
+    try {
+        const result = await db.query(query, values);
+        return result.rows[0];
+    } catch (error) {
+        throw new Error('Error fetching role: ' + error.message);
+    }
+};
+
+const getRoleByName = async (name) => {
+    const query = 'SELECT * FROM roles WHERE name = $1';
+    const values = [name];
 
     try {
         const result = await db.query(query, values);
@@ -89,6 +100,7 @@ module.exports = {
     // admin's roles services
     createRole,
     getRoleByID,
+    getRoleByName,
     getAllRoles,
     updateRole,
     deleteRole

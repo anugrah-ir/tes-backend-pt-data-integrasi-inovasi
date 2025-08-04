@@ -47,7 +47,19 @@ const getUserByID = async (id) => {
     }
 };
 
-const getAllusers = async () => {
+const getUserByUsername = async (username) => {
+    const query = 'SELECT * FROM users WHERE username = $1';
+    const values = [username];
+
+    try {
+        const result = await db.query(query, values);
+        return result.rows[0];
+    } catch (error) {
+        throw new Error('Error fetching user: ' + error.message);
+    }
+};
+
+const getAllUsers = async () => {
     const query = 'SELECT * FROM users';
     try {
         const result = await db.query(query);
@@ -59,9 +71,10 @@ const getAllusers = async () => {
 
 const updateUser = async (id, user) => {
     const { username, password } = user;
+    const hashedPassword = await bcrypt.hash(password, 10);
     const query = 'UPDATE users SET username = $1, password = $2 WHERE id = $3 RETURNING *';
-    const values = [username, password, id];
-    
+    const values = [username, hashedPassword, id];
+
     try {
         const result = await db.query(query, values);
         return result.rows[0];
@@ -82,13 +95,27 @@ const deleteUser = async (id) => {
     }
 };
 
+const assignRoleToUser = async (userId, roleId) => {
+    const query = 'INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2) RETURNING *';
+    const values = [userId, roleId];
+
+    try {
+        const result = await db.query(query, values);
+        return result.rows[0];
+    } catch (error) {
+        throw new Error('Error assigning role to user: ' + error.message);
+    }
+};
+
 module.exports = {
     // user's users services
     findAllRolesByUserId,
     // admin's users services
     createUser,
     getUserByID,
-    getAllusers,
+    getUserByUsername,
+    getAllUsers,
     updateUser,
     deleteUser,
+    assignRoleToUser
 };

@@ -3,12 +3,13 @@ const rolesService = require('./roles.service');
 // user's roles controllers
 
 const getRoleMenus = async (req, res) => {
-    try {
-        const roleId = req.user.role;
-        if (!roleId) {
-            return res.status(400).json({ message: 'Please select a role first.' });
-        }
+    const roleId = req.user.role;
+    
+    if (!roleId) {
+        return res.status(400).json({ message: 'Please select a role first.' });
+    }
 
+    try {
         const menus = await rolesService.getRoleMenus(roleId);
         return res.status(200).json({ message: 'Role menus fetched successfully.', data: menus });
     } catch (error) {
@@ -20,14 +21,14 @@ const getRoleMenus = async (req, res) => {
 // admin's roles controllers
 
 const createRole = async (req, res) => {
-    const { name } = req.body;
+    const { name, description } = req.body;
 
-    if (!name) {
-        return res.status(400).json({ error: 'Role name is required' });
+    if (!name || !description) {
+        return res.status(400).json({ error: 'Role name and description are required' });
     }
 
     try {
-        const newRole = await rolesService.createRole(name);
+        const newRole = await rolesService.createRole(name, description);
         res.status(201).json(newRole);
     } catch (error) {
         res.status(500).json({ error: error.message });

@@ -1,5 +1,5 @@
 const isAdmin = (req, res, next) => {
-    if (req.user.role !== 'admin') {
+    if (req.user.role !== "1") {
         return res.status(403).json({ status: 403, message: 'Access denied.', data: null });
     }
     next();

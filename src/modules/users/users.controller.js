@@ -19,14 +19,17 @@ const getAllUserRoles = async (req, res) => {
 
 const createUser = async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const user = {
+            username: req.body.username,
+            password: req.body.password
+        }
 
-        if (!username || !password) {
+        if (!user.username || !user.password) {
             return res.status(400).json({ message: 'Username and password are required.' });
         }
 
-        const user = await usersService.createUser({ username, password });
-        return res.status(201).json({ message: 'User created successfully.', data: user });
+        const createdUser = await usersService.createUser(user);
+        return res.status(201).json({ message: 'User created successfully.', data: createdUser });
     } catch (error) {
         console.error('Error creating user:', error);
         return res.status(500).json({ message: 'Internal server error.' });
@@ -34,9 +37,8 @@ const createUser = async (req, res) => {
 };
 
 const getUserByID = async (req, res) => {
-    const { id } = req.params;
-
     try {
+        const { id } = req.params;
         const user = await usersService.getUserByID(id);
         if (!user) {
             return res.status(404).json({ message: 'User not found.' });
@@ -60,14 +62,17 @@ const getAllUsers = async (req, res) => {
 
 const updateUser = async (req, res) => {
     const { id } = req.params;
-    const { username, password } = req.body;
+    const user = {
+        username: req.body.username,
+        password: req.body.password
+    };
 
-    if (!username && !password) {
+    if (!user.username && !user.password) {
         return res.status(400).json({ message: 'At least one field (username or password) is required to update.' });
     }
 
     try {
-        const updatedUser = await usersService.updateUser(id, { username, password });
+        const updatedUser = await usersService.updateUser(id, user);
         if (!updatedUser) {
             return res.status(404).json({ message: 'User not found.' });
         }
@@ -93,6 +98,18 @@ const deleteUser = async (req, res) => {
     }
 };
 
+const assignRoleToUser = async (req, res) => {
+    const { userId, roleId } = req.body;
+
+    try {
+        const assignedRole = await usersService.assignRoleToUser(userId, roleId);
+        return res.status(200).json({ message: 'Role assigned to user successfully.', data: assignedRole });
+    } catch (error) {
+        console.error('Error assigning role to user:', error);
+        return res.status(500).json({ message: 'Internal server error.' });
+    }
+};
+
 module.exports = {
     // user's users controllers
     getAllUserRoles,
@@ -101,5 +118,6 @@ module.exports = {
     getUserByID,
     getAllUsers,
     updateUser,
-    deleteUser
+    deleteUser,
+    assignRoleToUser
 };

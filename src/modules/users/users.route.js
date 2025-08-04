@@ -11,6 +11,7 @@ routes
     .get('/:id', verifyToken, isAdmin, userController.getUserByID)
     .get('/', verifyToken, isAdmin, userController.getAllUsers)
     .put('/:id', verifyToken, isAdmin, userController.updateUser)
-    .delete('/:id', verifyToken, isAdmin, userController.deleteUser);
+    .delete('/:id', verifyToken, isAdmin, userController.deleteUser)
+    .post('/:id/role', verifyToken, isAdmin, userController.assignRoleToUser);
 
 module.exports = routes;
