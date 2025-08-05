@@ -38,6 +38,11 @@ const selectRole = async (req, res) => {
             return res.status(400).json({ message: 'Please select a role first.' });
         }
 
+        const hasThisRole = await authService.getUserRoleByRoleId(userId, roleId);
+        if (!hasThisRole) {
+            return res.status(403).json({ message: 'You do not have permission to select this role.' });
+        }
+
         const token = jwt.sign({ id: userId, role: roleId}, secretKey, { expiresIn: '1h' });
         return res.status(200).json({ message: 'Role selected successfully.', data: { token } });
     } catch (error) {
